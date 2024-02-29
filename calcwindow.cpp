@@ -20,13 +20,7 @@ CalcWindow::CalcWindow(QWidget *parent)
     this->setStyleSheet("background-color: rgb(255, 255, 255); color: rgb(0,0,0);");
     ui->result->setStyleSheet("background-color: rgb(255, 255, 255); color: rgb(0,0,0);border: 1px solid black; border-width: 1px;");
 
-    //this->setStyleSheet("border: 1px solid black; border-width: 1px; background-color: rgb(1, 153, 26); ");
-    //this->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,    stop: 0 #77b9ea, stop: 1 #1593ee);");
-    //ui->result->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,    stop: 0 #2d7ab2, stop: 1 #77c3fa);"
-    //                            "color: white;");
-    //this->setStyleSheet("* {color: qlineargradient(spread:pad, x1:0 y1:0, x2:1 y2:0, stop:0 rgba(0, 0, 0, 255), stop:1 rgba(255, 255, 255, 255));"
-    //                       "background: qlineargradient( x1:0 y1:0, x2:1 y2:0, stop:0 cyan, stop:1 blue);}");
-    //border-color: beige;border-width: 2px;border: solid black; background-color: rgb(1, 153, 26);");
+
 
     connect(ui->button_1,SIGNAL(clicked()),this,SLOT(digits()));
     connect(ui->button_2,SIGNAL(clicked()),this,SLOT(digits()));
@@ -44,16 +38,13 @@ CalcWindow::CalcWindow(QWidget *parent)
     connect(ui->precent_button,SIGNAL(clicked()),this,SLOT(simple_ops()));
 
     connect(ui->plus_button,SIGNAL(clicked()),this,SLOT(math_ops()));
-    //connect(ui->plus_button,SIGNAL(clicked()),this,SLOT(clear_scr()));
 
     connect(ui->minus_button,SIGNAL(clicked()),this,SLOT(math_ops()));
-    //connect(ui->minus_button,SIGNAL(clicked()),this,SLOT(clear_scr()));
 
     connect(ui->multi_button,SIGNAL(clicked()),this,SLOT(math_ops()));
-    //connect(ui->multi_button,SIGNAL(clicked()),this,SLOT(clear_scr()));
 
     connect(ui->div_button,SIGNAL(clicked()),this,SLOT(math_ops()));
-    //connect(ui->div_button,SIGNAL(clicked()),this,SLOT(clear_scr()));
+
     connect(ui->mod_button,SIGNAL(clicked()),this,SLOT(math_ops()));
 
     connect(ui->sqr_root_button,SIGNAL(clicked()),this,SLOT(simple_ops()));
@@ -61,11 +52,6 @@ CalcWindow::CalcWindow(QWidget *parent)
     connect(ui->pow_2_button,SIGNAL(clicked()),this,SLOT(simple_ops()));
     connect(ui->pow_3_button,SIGNAL(clicked()),this,SLOT(simple_ops()));
 
-//    ui->plus_button->setCheckable(true);
-//    ui->minus_button->setCheckable(true);
-//    ui->multi_button->setCheckable(true);
-//    ui->div_button->setCheckable(true);
-//    ui->mod_button->setCheckable(true);
 }
 
 CalcWindow::~CalcWindow()
@@ -73,17 +59,14 @@ CalcWindow::~CalcWindow()
     delete ui;
 }
 
+
+
 void CalcWindow::reset_scr(QString const & str)
 {
 ui->result->setText(str);
 }
 
-void CalcWindow::bool_check()
-{
-    ui->statusbar->showMessage(QString::number(ui->plus_button->isChecked())+" "
-   +QString::number(ui->minus_button->isChecked())+" "+QString::number(ui->multi_button->isChecked())+" "
-   +QString::number(ui->div_button->isChecked())+" "+QString::number(ui->mod_button->isChecked()));
-}
+
 
 bool & CalcWindow::math_switch(QString str)
 {
@@ -122,8 +105,6 @@ void CalcWindow::digits()
     else
 
         ui->result->setText(button->text());
-//math_switch("-")=true;
-//ui->statusbar->showMessage(QString::number(math_switch("-")));
 }
 
 void CalcWindow::undo()
@@ -144,6 +125,8 @@ void CalcWindow::undo()
 
     }
 }
+
+
 
 void CalcWindow::simple_ops()
 {
@@ -196,10 +179,12 @@ void CalcWindow::simple_ops()
     }
 }
 
+
+
 void CalcWindow::math_ops()
 {
     QPushButton *button = static_cast<QPushButton*>(sender());
-//bool_check();
+
     double tempNumber, num_second; //temp input value,
                                     //and second user
                                     //input value
@@ -211,63 +196,52 @@ void CalcWindow::math_ops()
     if(buffer_checked()){ //{1} if 1st math symbol
 
         buffer_checked()=false;
-   //bool_check();
-        //ui->statusbar->showMessage("buffer_check ==" + QString::number(buffer_checked()));
 
         buffer_=ui->result->text().toDouble();
-  ui->statusbar->showMessage("miami first" + QString::number(buffer_));
+  ui->statusbar->showMessage(QString::number(buffer_));
 
 
-    } else {
+            } else {
 
-  //bool_check();
             if(math_switch("+")){ //{2} if 2nd and more..
 
         tempNumber = this->buffer_ + num_second;
 
         new_label = QString::number(tempNumber, 'g', 15);
 
-
-
         buffer_=tempNumber;
 
-        ui->statusbar->showMessage("miami second plus" + new_label);
+        ui->statusbar->showMessage(new_label);
 
         math_switch("+")=false;
-        //button->setChecked(true);
+
     } else if(math_switch("-")){
 
         tempNumber = this->buffer_ - num_second;
 
         new_label = QString::number(tempNumber, 'g', 15);
 
-        //ui->result->setText(new_label);
-
         buffer_=tempNumber;
 
         ui->statusbar->showMessage(new_label);
 
         math_switch("-")=false;
-        //button->setChecked(true);
+
     } else if (math_switch("*")){
 
         tempNumber = this->buffer_ * num_second;
 
         new_label = QString::number(tempNumber, 'g', 15);
 
-        //ui->result->setText(new_label);
-
         buffer_ = tempNumber;
 
         ui->statusbar->showMessage(new_label);
 
         math_switch("*")=false;
-        //button->setChecked(true);
+
     } else if (math_switch("/")){
 
         if(num_second==0){
-
-        //ui->result->setText("0");
 
             ui->statusbar->showMessage("Warning: division by zero!!");
 
@@ -281,17 +255,13 @@ void CalcWindow::math_ops()
 
         buffer_ = tempNumber;
 
-         //ui->result->setText(new_label);
-
             }
 
         math_switch("/")=false;
-        //button->setChecked(true);
+
     } else if (math_switch("%")){
 
         if(num_second==0){
-
-        //ui->result->setText("0");
 
             ui->statusbar->showMessage("Warning: division by zero!!");
 
@@ -303,17 +273,15 @@ void CalcWindow::math_ops()
 
         new_label = QString::number(tempres, 'g', 15);
         ui->statusbar->showMessage(new_label);
-        //ui->result->setText(new_label);
 
         buffer_ = static_cast<double>(tempres);
                 }
 
         math_switch("%")=false;
-        //button->setChecked(true);
 
     }
 
-//bool_check();
+
 
 }
 
@@ -335,7 +303,6 @@ void CalcWindow::on_default_color_clicked()
 
 void CalcWindow::on_color_1_clicked()
 {
-    //this->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,    stop: 0 #77b9ea, stop: 1 #1593ee);");
     this->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,    stop: 0 #77b9ea, stop: 1 #73bff5);");
     ui->result->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,    stop: 0 #2d7ab2, stop: 1 #77c3fa);"
                                 "color: white; border: 1px solid black; border-width: 1px;");
@@ -346,7 +313,7 @@ void CalcWindow::on_color_2_clicked()
     this->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,    stop: 0 #2d7ab2, stop: 1 #ae32a0);"
                         "color: white;");
     ui->result->setStyleSheet("background-color: rgb(255, 255, 255); color: rgb(0,0,0); border: 1px solid black; border-width: 1px;");
-//"qlineargradient( x1:0 y1:0, x2:1 y2:0, stop:0 cyan, stop:1 blue);");
+
 }
 
 void CalcWindow::on_dot_button_clicked()
