@@ -33,7 +33,14 @@ private slots:
 
     bool & clear_checked(){static bool clr=false;return clr;}
 
+    bool & buffer_checked();
 
+    //void flags_clear();
+
+
+    void bool_check();
+
+    bool & math_switch(QString);
 
     void on_default_color_clicked();
 

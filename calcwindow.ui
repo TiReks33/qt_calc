@@ -241,6 +241,9 @@
       </item>
       <item row="5" column="3">
        <widget class="QPushButton" name="multi_button">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="focusPolicy">
          <enum>Qt::ClickFocus</enum>
         </property>
@@ -281,6 +284,9 @@
       </item>
       <item row="6" column="3">
        <widget class="QPushButton" name="div_button">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
         <property name="focusPolicy">
          <enum>Qt::ClickFocus</enum>
         </property>
