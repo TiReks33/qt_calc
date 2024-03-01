@@ -1,27 +1,27 @@
 #include "calcwindow.h"
 #include "ui_calcwindow.h"
 #include <QtMath>
+#include <cmath> // for fmod() (float version of modulo division C-function)
+
+//bool & CalcWindow::buffer_checked(){static bool buf=true;return buf;}
 
 CalcWindow::CalcWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::CalcWindow)
-    , buffer_(Buffer::instance().data()) //singleton instance initialization
+    , buffer_(Buffer::instance().data()) // singleton instance initialization
 {
-    buffer_=0.0;
-    //this->setFixedSize(QSize(375, 375));
+    buffer_=0.0; // buffer value initialize
+
     ui->setupUi(this);
+
+    // move widget to the @centre@ of the screen
     this->move(this->geometry().center());
+
+    // starting "theme"
     this->setStyleSheet("background-color: rgb(255, 255, 255); color: rgb(0,0,0);");
     ui->result->setStyleSheet("background-color: rgb(255, 255, 255); color: rgb(0,0,0);border: 1px solid black; border-width: 1px;");
 
-    //this->setStyleSheet("border: 1px solid black; border-width: 1px; background-color: rgb(1, 153, 26); ");
-    //this->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,    stop: 0 #77b9ea, stop: 1 #1593ee);");
-    //ui->result->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,    stop: 0 #2d7ab2, stop: 1 #77c3fa);"
-    //                            "color: white;");
-    //this->setStyleSheet("* {color: qlineargradient(spread:pad, x1:0 y1:0, x2:1 y2:0, stop:0 rgba(0, 0, 0, 255), stop:1 rgba(255, 255, 255, 255));"
-    //                       "background: qlineargradient( x1:0 y1:0, x2:1 y2:0, stop:0 cyan, stop:1 blue);}");
-    //border-color: beige;border-width: 2px;border: solid black; background-color: rgb(1, 153, 26);");
-
+    // numbers input connect to digits() func
     connect(ui->button_1,SIGNAL(clicked()),this,SLOT(digits()));
     connect(ui->button_2,SIGNAL(clicked()),this,SLOT(digits()));
     connect(ui->button_3,SIGNAL(clicked()),this,SLOT(digits()));
@@ -33,39 +33,36 @@ CalcWindow::CalcWindow(QWidget *parent)
     connect(ui->button_9,SIGNAL(clicked()),this,SLOT(digits()));
     connect(ui->button_0,SIGNAL(clicked()),this,SLOT(digits()));
 
+    // "undo" button signal
     connect(ui->undo_button,SIGNAL(clicked()),this,SLOT(undo()));
+
+    // unarian ops signal to simple_ops() slot
     connect(ui->plus_minus_button,SIGNAL(clicked()),this,SLOT(simple_ops()));
     connect(ui->precent_button,SIGNAL(clicked()),this,SLOT(simple_ops()));
-
-    connect(ui->plus_button,SIGNAL(clicked()),this,SLOT(math_ops()));
-    //connect(ui->plus_button,SIGNAL(clicked()),this,SLOT(clear_scr()));
-
-    connect(ui->minus_button,SIGNAL(clicked()),this,SLOT(math_ops()));
-    //connect(ui->minus_button,SIGNAL(clicked()),this,SLOT(clear_scr()));
-
-    connect(ui->multi_button,SIGNAL(clicked()),this,SLOT(math_ops()));
-    //connect(ui->multi_button,SIGNAL(clicked()),this,SLOT(clear_scr()));
-
-    connect(ui->div_button,SIGNAL(clicked()),this,SLOT(math_ops()));
-    //connect(ui->div_button,SIGNAL(clicked()),this,SLOT(clear_scr()));
-    connect(ui->mod_button,SIGNAL(clicked()),this,SLOT(math_ops()));
-
     connect(ui->sqr_root_button,SIGNAL(clicked()),this,SLOT(simple_ops()));
     connect(ui->cube_root_button,SIGNAL(clicked()),this,SLOT(simple_ops()));
     connect(ui->pow_2_button,SIGNAL(clicked()),this,SLOT(simple_ops()));
     connect(ui->pow_3_button,SIGNAL(clicked()),this,SLOT(simple_ops()));
 
-    ui->plus_button->setCheckable(true);
-    ui->minus_button->setCheckable(true);
-    ui->multi_button->setCheckable(true);
-    ui->div_button->setCheckable(true);
-    ui->mod_button->setCheckable(true);
+    // binary ops
+    connect(ui->plus_button,SIGNAL(clicked()),this,SLOT(math_ops()));
+
+    connect(ui->minus_button,SIGNAL(clicked()),this,SLOT(math_ops()));
+
+    connect(ui->multi_button,SIGNAL(clicked()),this,SLOT(math_ops()));
+
+    connect(ui->div_button,SIGNAL(clicked()),this,SLOT(math_ops()));
+
+    connect(ui->mod_button,SIGNAL(clicked()),this,SLOT(math_ops()));
+
 }
 
 CalcWindow::~CalcWindow()
 {
     delete ui;
 }
+
+
 
 void CalcWindow::reset_scr(QString const & str)
 {
@@ -74,15 +71,35 @@ ui->result->setText(str);
 
 
 
+bool & CalcWindow::math_switch(QString str)
+{
+    static bool plus     = false,
+                minus    = false,
+                multi    = false,
+                div      = false,
+                mod      = false,
+                default_ = false; // yeah, i know, this is "meeh".
+
+         if(str=="plus" ||str=="+") {return plus ;}
+    else if(str=="minus"||str=="-") {return minus;}
+    else if(str=="multi"||str=="*") {return multi;}
+    else if(str=="div"  ||str=="/") {return div;  }
+    else if(str=="mod"  ||str=="%") {return mod;  }
+
+    return default_; // the weather is cold tomorrow i guess. %-)
+}
+
 void CalcWindow::digits()
 {
+    // casting input signal to button class object
+    // (for using methods of button for this signal)
     QPushButton *button = static_cast<QPushButton*>(sender());
 
-    if((ui->plus_button->isChecked()||ui->minus_button->isChecked()
-            ||ui->multi_button->isChecked()||ui->div_button->isChecked()
-            ||ui->mod_button->isChecked())
+    if((math_switch("+")||math_switch("-")
+      ||math_switch("*")||math_switch("/")
+                ||math_switch("%"))
                 &&clear_checked())
-
+    // cleaning the screen if this is new string of number
                {
 
                 reset_scr();
@@ -91,22 +108,17 @@ void CalcWindow::digits()
 
                 }
 
-    //double multi_numbers;
-    //QString new_label;
-
-    //multi_numbers = (ui->result->text() + button->text()).toDouble();
-    //new_label = QString::number(multi_numbers, 'g', 15);
-    //ui->result->setText(new_label);
     if(!(ui->result->text()=="0"))
 
         ui->result->setText(ui->result->text() + button->text());
 
     else
-
+    //delete first "zero" from number input
         ui->result->setText(button->text());
-
 }
 
+
+// "undo" button
 void CalcWindow::undo()
 {
     QString text(ui->result->text());
@@ -126,12 +138,15 @@ void CalcWindow::undo()
     }
 }
 
+
+// unarian ops
 void CalcWindow::simple_ops()
 {
     QPushButton *button = static_cast<QPushButton*>(sender());
     double all_numbers;
     QString new_label;
 
+    // positive to negative number
     if(button->text() == "+/-"){
 
         all_numbers = (ui->result->text()).toDouble();
@@ -139,8 +154,9 @@ void CalcWindow::simple_ops()
         new_label = QString::number(all_numbers, 'g', 15);
 
         ui->result->setText(new_label);
+        buffer_=all_numbers;
     }
-
+    // precent from number/operation
         else if(button->text() == "%")
     {
         all_numbers = (ui->result->text()).toDouble();
@@ -148,48 +164,189 @@ void CalcWindow::simple_ops()
         new_label = QString::number(all_numbers, 'g', 15);
 
         ui->result->setText(new_label);
+        buffer_=all_numbers;
     }
+    // square root
         else if(button==ui->sqr_root_button)
     {
-        ui->result->setText(QString::number(qSqrt(ui->result->text().toDouble())));
+        all_numbers = qSqrt(ui->result->text().toDouble());
+        ui->result->setText(QString::number(all_numbers));
+        buffer_=all_numbers;
     }
+    // power^2
         else if(button==ui->pow_2_button)
     {
-        ui->result->setText(QString::number(qPow(ui->result->text().toDouble(),2)));
+        all_numbers = qPow(ui->result->text().toDouble(),2);
+        ui->result->setText(QString::number(all_numbers));
+        buffer_ = all_numbers;
     }
+    // power^3
         else if(button==ui->pow_3_button)
     {
-        ui->result->setText(QString::number(qPow(ui->result->text().toDouble(),3)));
+        all_numbers = qPow(ui->result->text().toDouble(),3);
+        ui->result->setText(QString::number(all_numbers));
+        buffer_ = all_numbers;
     }
+    // cube root
         else if(button==ui->cube_root_button)
     {
-        ui->result->setText(QString::number(qPow(ui->result->text().toDouble(),(1/3.))));
+        all_numbers = qPow(ui->result->text().toDouble(),(1/3.));
+        ui->result->setText(QString::number(all_numbers));
+        buffer_ = all_numbers;
     }
 }
 
+
+// binary ops
 void CalcWindow::math_ops()
 {
     QPushButton *button = static_cast<QPushButton*>(sender());
 
-    this->buffer_ = ui->result->text().toDouble();
+    double tempNumber, num_second; //temp input value,
+                                    //and second user
+                                    //input value
+    QString new_label;
 
-    //ui->statusbar->showMessage(QString::number(this->buffer_, 'g', 15)+"ABCD");
+    num_second = ui->result->text().toDouble();
 
-    //ui->result->setText("");
-    //ui->result->setText(button->text());
 
-    button->setChecked(true);
 
-    //ui->statusbar->showMessage(QString::number(button->isChecked()));
+    if(buffer_checked()){ //<-{1} start -- if 1st math symbol detect
 
+
+        buffer_checked()=false;
+
+        buffer_=ui->result->text().toDouble();
+        ui->statusbar->showMessage(QString::number(buffer_));
+
+    //<-{1} end
+
+    } else {   //<-{2} start -- if 2nd and so on..
+
+            // plus
+        if(math_switch("+")){
+
+            tempNumber = this->buffer_ + num_second;
+
+            // number to string
+            new_label = QString::number(tempNumber, 'g', 15);
+
+            buffer_=tempNumber;
+
+            ui->statusbar->showMessage(new_label);
+
+            // disable plus flag
+            math_switch("+")=false;
+
+            // minus
+    } else if(math_switch("-")){
+
+            tempNumber = this->buffer_ - num_second;
+
+            new_label = QString::number(tempNumber, 'g', 15);
+
+            buffer_=tempNumber;
+
+            ui->statusbar->showMessage(new_label);
+
+            math_switch("-")=false;
+
+            // multiply
+    } else if (math_switch("*")){
+
+            tempNumber = this->buffer_ * num_second;
+
+            new_label = QString::number(tempNumber, 'g', 15);
+
+            buffer_ = tempNumber;
+
+            ui->statusbar->showMessage(new_label);
+
+            math_switch("*")=false;
+
+            // division
+    } else if (math_switch("/")){
+
+            // div by zero case
+            if(num_second==0){
+
+                ui->statusbar->showMessage("Warning: division by zero!!");
+
+                // for next number buffering after reset
+                buffer_checked()=true;
+
+                buffer_ = 0.0;
+
+                } else {
+
+            tempNumber = this->buffer_ / num_second;
+
+            new_label = QString::number(tempNumber, 'g', 15);
+
+            ui->statusbar->showMessage(new_label);
+
+            buffer_ = tempNumber;
+
+                }
+
+            math_switch("/")=false;
+
+            // modulo division
+    } else if (math_switch("%")){
+
+            // div by zero
+            if(num_second==0){
+
+                ui->statusbar->showMessage("Warning: division by zero!!");
+
+                buffer_checked()=true;
+
+                buffer_ = 0.0;
+
+                } else {
+//            int temp1=static_cast<int>(this->buffer_);
+//            int temp2=static_cast<int>(num_second);
+
+//            int tempres = temp1 % temp2;
+
+//            new_label = QString::number(tempres, 'g', 15);
+
+                double buftemp = buffer_;
+                double modtemp = std::fmod(buftemp,num_second);
+                new_label = QString::number(modtemp);
+
+                ui->statusbar->showMessage(new_label);
+
+//                buffer_ = static_cast<double>(tempres);
+
+                buffer_ = modtemp;
+
+                    }
+
+            // disable modulo flag
+            math_switch("%")=false;
+
+    }
+
+
+
+    } //<-{2} end
+
+    // current binary ariphmetic operation
+    // flag setup (enabled)
+    math_switch(button->text())=true;
+
+    // cleaning screen for next number
     clear_checked()=true;
 
+    // current bin operation symbol to screen
     reset_scr(button->text());
+
 
 }
 
 
-
+// widget customize
 void CalcWindow::on_default_color_clicked()
 {
     this->setStyleSheet("background-color: rgb(255, 255, 255); color: rgb(0,0,0);");
@@ -198,7 +355,6 @@ void CalcWindow::on_default_color_clicked()
 
 void CalcWindow::on_color_1_clicked()
 {
-    //this->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,    stop: 0 #77b9ea, stop: 1 #1593ee);");
     this->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,    stop: 0 #77b9ea, stop: 1 #73bff5);");
     ui->result->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,    stop: 0 #2d7ab2, stop: 1 #77c3fa);"
                                 "color: white; border: 1px solid black; border-width: 1px;");
@@ -209,99 +365,162 @@ void CalcWindow::on_color_2_clicked()
     this->setStyleSheet("background-color: qlineargradient(x1: 0, y1: 0,    x2: 0, y2: 1,    stop: 0 #2d7ab2, stop: 1 #ae32a0);"
                         "color: white;");
     ui->result->setStyleSheet("background-color: rgb(255, 255, 255); color: rgb(0,0,0); border: 1px solid black; border-width: 1px;");
-//"qlineargradient( x1:0 y1:0, x2:1 y2:0, stop:0 cyan, stop:1 blue);");
+
 }
 
+// float number dot
 void CalcWindow::on_dot_button_clicked()
 {
     if(!(ui->result->text().contains('.')))
         ui->result->setText(ui->result->text() + ".");
 }
 
+
+
+// finalize the last binary op,
+// show result and clean buffer
 void CalcWindow::on_equal_button_clicked()
 {
-    double tempNumber, num_second; //temp input value,
-                                    //and second user
-                                    //input value
+    // temp input value,
+    // and second(/last) user
+    // input value
+    double tempNumber, num_second;
+
+    // to setup result on screen
     QString new_label;
 
+    // last(current) number input
     num_second = ui->result->text().toDouble();
 
-    if(ui->plus_button->isChecked()){
+        // if '+' flag enabled
+        // (if last operation before
+        // equal is summarizing)
+    if(math_switch("+")){
 
         tempNumber = this->buffer_ + num_second;
 
         new_label = QString::number(tempNumber, 'g', 15);
 
-        ui->result->setText(new_label);
-        ui->plus_button->setChecked(false);
+        ui->statusbar->showMessage(new_label);
 
-    } else if(ui->minus_button->isChecked()){
+        buffer_ = tempNumber;
+        ui->result->setText(new_label);
+        math_switch("+")=false;
+
+        // if minus
+    } else if(math_switch("-")){
 
         tempNumber = this->buffer_ - num_second;
 
         new_label = QString::number(tempNumber, 'g', 15);
 
-        ui->result->setText(new_label);
-        ui->minus_button->setChecked(false);
+        ui->statusbar->showMessage(new_label);
 
-    } else if(ui->multi_button->isChecked()){
+        buffer_ = tempNumber;
+        ui->result->setText(new_label);
+        math_switch("-")=false;
+
+        // if multiply
+    } else if(math_switch("*")){
 
         tempNumber = this->buffer_ * num_second;
 
         new_label = QString::number(tempNumber, 'g', 15);
 
+        ui->statusbar->showMessage(new_label);
+
+        buffer_ = tempNumber;
         ui->result->setText(new_label);
-        ui->multi_button->setChecked(false);
+        math_switch("*")=false;
 
-    } else if(ui->div_button->isChecked()){
+        // if div
+    } else if(math_switch("/")){
 
+        // div by zero case
             if(num_second==0){
+
+                ui->statusbar->showMessage("Warning: division by zero!!");
+
+                ui->result->setText("0");
+
+                buffer_checked()=true;
+
+                buffer_ = 0.0;
+
+             } else {
+
+                tempNumber = this->buffer_ / num_second;
+
+                new_label = QString::number(tempNumber, 'g', 15);
+
+                ui->statusbar->showMessage(new_label);
+
+                buffer_ = tempNumber;
+
+                ui->result->setText(new_label);
+
+             }
+
+            math_switch("/")=false;
+
+            // if modulo div
+    }   else if(math_switch("%")){
+
+            // div by zero case
+            if(num_second==0){
+
+                ui->statusbar->showMessage("Warning: division by zero!!");
 
             ui->result->setText("0");
 
+            buffer_checked()=true;
+
+            buffer_ = 0.0;
+
                 } else {
+//        int temp1=static_cast<int>(this->buffer_);
+//        int temp2=static_cast<int>(num_second);
 
-            tempNumber = this->buffer_ / num_second;
+//        int tempres = temp1 % temp2;
 
-            new_label = QString::number(tempNumber, 'g', 15);
+//        new_label = QString::number(tempres, 'g', 15);
 
-             ui->result->setText(new_label);
+            double buftemp = buffer_;
+            double modtemp = std::fmod(buftemp,num_second);
+            new_label = QString::number(modtemp);
 
-                }
+            ui->statusbar->showMessage(new_label);
 
-            ui->div_button->setChecked(false);
+//        buffer_ = tempres;
+            buffer_ = modtemp;
 
-    }   else if(ui->mod_button->isChecked()){
+            ui->statusbar->showMessage(new_label);
 
-        if(num_second==0){
+            ui->result->setText(new_label);
 
-        ui->result->setText("0");
+                    }
 
-            } else {
-        int temp1=static_cast<int>(this->buffer_);
-        int temp2=static_cast<int>(num_second);
+            math_switch("%")=false;
 
-        int tempres = temp1 % temp2;
+     }
 
-        new_label = QString::number(tempres, 'g', 15);
-        ui->statusbar->showMessage(new_label);
-        ui->result->setText(new_label);
-                }
-        ui->mod_button->setChecked(false);
 
-    }
+            buffer_checked()=true;
+
 }
 
 
-
+// "Clear" button
 void CalcWindow::on_clear_button_clicked()
 {
-    ui->plus_button->setChecked(false);
-    ui->minus_button->setChecked(false);
-    ui->multi_button->setChecked(false);
-    ui->div_button->setChecked(false);
-    ui->mod_button->setChecked(false);
+    math_switch("+")=false;
+    math_switch("-")=false;
+    math_switch("*")=false;
+    math_switch("/")=false;
+    math_switch("%")=false;
 
     ui->result->setText("0");
+    buffer_checked()=true;
+    buffer_=0.0;
+    //clear_checked()=false;
 }
