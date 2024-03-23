@@ -16,6 +16,7 @@ public:
     CalcWindow(QWidget *parent = nullptr);
     ~CalcWindow();
 
+    bool eventFilter(QObject *object, QEvent *event);
 
 
 private slots:

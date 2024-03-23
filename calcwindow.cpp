@@ -2,6 +2,7 @@
 #include "ui_calcwindow.h"
 #include <QtMath>
 #include <cmath> // for fmod() (float version of modulo division C-function)
+#include <QDebug>
 
 //bool & CalcWindow::buffer_checked(){static bool buf=true;return buf;}
 
@@ -55,6 +56,39 @@ CalcWindow::CalcWindow(QWidget *parent)
 
     connect(ui->mod_button,SIGNAL(clicked()),this,SLOT(math_ops()));
 
+
+    // resizing(font scalling) for buttons
+
+    ui->button_1->installEventFilter(this);
+    ui->button_2->installEventFilter(this);
+    ui->button_3->installEventFilter(this);
+    ui->button_4->installEventFilter(this);
+    ui->button_5->installEventFilter(this);
+    ui->button_6->installEventFilter(this);
+    ui->button_7->installEventFilter(this);
+    ui->button_8->installEventFilter(this);
+    ui->button_9->installEventFilter(this);
+    ui->button_0->installEventFilter(this);
+
+    ui->undo_button->installEventFilter(this);
+
+    ui->plus_minus_button->installEventFilter(this);
+    ui->precent_button->installEventFilter(this);
+    ui->sqr_root_button->installEventFilter(this);
+    ui->cube_root_button->installEventFilter(this);
+    ui->pow_2_button->installEventFilter(this);
+    ui->pow_3_button->installEventFilter(this);
+
+    ui->plus_button->installEventFilter(this);
+    ui->minus_button->installEventFilter(this);
+    ui->multi_button->installEventFilter(this);
+    ui->div_button->installEventFilter(this);
+    ui->mod_button->installEventFilter(this);
+
+
+
+    //this->installEventFilter(this);
+ui->statusbar->showMessage(ui->plus_button->metaObject()->className());
 }
 
 CalcWindow::~CalcWindow()
@@ -62,6 +96,31 @@ CalcWindow::~CalcWindow()
     delete ui;
 }
 
+
+bool CalcWindow::eventFilter(QObject *object, QEvent *event)
+{
+    QPushButton *button = static_cast<QPushButton*>(object);
+    if(/*object->metaObject()->className()=="QPushButton"*/
+            //static_cast<QPushButton*>(object)
+            button
+            && event->type()== QEvent::Resize
+            //&& this->size()!=this->minimumSize()
+            ) {
+        QFont font = button->font();
+
+
+        ui->statusbar->showMessage(QString::number(ui->plus_button->size().height())+" FONT == "+/*QString::number(font.pixelSize())+*/' '+QString::number(font.pointSize()));
+
+        font.setPointSize(this->size().height()/37.5);
+        button->setFont(font);
+    }
+
+    CalcWindow *main = static_cast<CalcWindow*>(this);
+    if(main && event->type()==QEvent::Resize)
+        qDebug() << "MAIN WINDOW SIZE == " << QString::number(this->size().height());
+
+        return QMainWindow::eventFilter(object, event);
+}
 
 
 void CalcWindow::reset_scr(QString const & str)
