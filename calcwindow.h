@@ -44,7 +44,7 @@ private slots:
     bool & buffer_checked(){static bool buf=true;return buf;}
 
  // check what binary operation needed to execute
-    bool & math_switch(QString);
+    bool & math_switch(QString="");
 
  // customize style of calc widget
     void on_default_color_clicked();
