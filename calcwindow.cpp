@@ -12,6 +12,7 @@ CalcWindow::CalcWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::CalcWindow)
     , buffer_(Buffer::instance().data()) // singleton instance initialization
+    , buffer_2(Buffer::instance().brackets())
 {
     buffer_=0.0; // buffer value initialize
 
@@ -94,6 +95,14 @@ CalcWindow::CalcWindow(QWidget *parent)
 
       ui->result->installEventFilter(this);
 
+      //BUFFER 2 (BRACKETS)
+
+      connect(ui->left_br_button,SIGNAL(clicked()),this,SLOT(brackets()));
+
+      connect(ui->right_br_button,SIGNAL(clicked()),this,SLOT(brackets()));
+
+      ui->right_br_button->setEnabled(false);
+      ui->right_br_button->setStyleSheet("color: gray");
 }
 
 
@@ -162,10 +171,21 @@ void CalcWindow::digits()
     // (for using methods of button for this signal)
     QPushButton *button = static_cast<QPushButton*>(sender());
 
-    if((math_switch("+")||math_switch("-")
-      ||math_switch("*")||math_switch("/")
-                ||math_switch("%"))
-                &&clear_checked())
+    if(
+            (
+
+            (
+            math_switch("+")||math_switch("-")
+          ||math_switch("*")||math_switch("/")
+          ||math_switch("%")
+            )
+
+          ||brackets_check()
+
+            )
+          &&
+            clear_checked()
+            )
     // cleaning the screen if this is new string of number
                {
 
@@ -604,4 +624,70 @@ void CalcWindow::on_clear_button_clicked()
     buffer_checked()=true;
     buffer_=0.0;
     //clear_checked()=false;
+}
+
+void CalcWindow::brackets()
+{
+    static bool plus = false,
+                minus = false,
+                div = false,
+                multi = false,
+                mod = false;
+
+
+    QPushButton *button = static_cast<QPushButton*>(sender());
+    if(button==ui->left_br_button){
+
+        //%%%%%%%%%%%%%
+        // expr. backup
+        //%%%%%%%%%%%%%
+        if(math_switch("plus")){plus=true;math_switch("plus")=false;}
+        else if(math_switch("minus")){minus=true;math_switch("minus")=false;}
+        else if(math_switch("div")){div=true;math_switch("div")=false;}
+        else if(math_switch("multi")){multi=true;math_switch("multi")=false;}
+        else if(math_switch("mod")){mod=true;math_switch("mod")=false;}
+        //%%%%%%%%%%%%%
+
+        ui->equal_button->setEnabled(false);
+        ui->equal_button->setStyleSheet("color: gray");
+        ui->left_br_button->setEnabled(false);
+        ui->left_br_button->setStyleSheet("color: gray");
+
+        ui->right_br_button->setEnabled(true);
+        ui->right_br_button->setStyleSheet("");
+
+        buffer_2=buffer_;
+        buffer_=0.0;
+        buffer_checked()=true;
+        clear_checked()=true;
+        brackets_check()=true;
+
+    } else
+    if(button==ui->right_br_button){
+
+        on_equal_button_clicked();
+
+        //%%%%%%%%%%%%%
+        // expr. restore
+        //%%%%%%%%%%%%%
+        if(plus){buffer_=buffer_2+buffer_;plus=false;}
+        else if(minus){buffer_=buffer_2-buffer_;minus=false;}
+        else if(div){buffer_=buffer_2/buffer_;div=false;}
+        else if(multi){buffer_=buffer_2*buffer_;multi=false;}
+        else if(mod){buffer_=std::fmod(buffer_2,buffer_);mod=false;}
+
+            ui->statusbar->showMessage(QString::number(buffer_));
+            ui->result->setText(QString::number(buffer_));
+        //%%%%%%%%%%%%%
+
+        ui->equal_button->setEnabled(true);
+        ui->equal_button->setStyleSheet("");
+        ui->left_br_button->setEnabled(true);
+        ui->left_br_button->setStyleSheet("");
+
+        ui->right_br_button->setEnabled(false);
+        ui->right_br_button->setStyleSheet("color: gray");
+
+        brackets_check()=false;
+    }
 }

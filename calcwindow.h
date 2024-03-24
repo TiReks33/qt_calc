@@ -63,6 +63,12 @@ private slots:
  // "C" button on calculator keyboard
     void on_clear_button_clicked();
 
+    void brackets();
+
+    void on_left_br_button_clicked();
+
+    bool & brackets_check(){static bool brackets=false;return brackets;}
+
 private:
     Ui::CalcWindow *ui;
 
@@ -70,6 +76,7 @@ private:
     // (for buffering temporary
    // result of equations)
     double& buffer_;
+    double& buffer_2;
 };
 
 // class of buffer singleton
@@ -81,7 +88,14 @@ public:
         return buf;
     }
 
+//    static Buffer & instance2(){
+//        static Buffer buf2;
+//        return buf2;
+
+//    }
+
     double & data()  {return data_;}
+    double & brackets() {return brackets_;}
 private:
     Buffer(){}
 
@@ -89,6 +103,7 @@ private:
     Buffer& operator=(Buffer const&);
 
     double data_;
+    double brackets_;
 };
 
 #endif // CALCWINDOW_H
