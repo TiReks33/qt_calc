@@ -92,11 +92,11 @@ CalcWindow::CalcWindow(QWidget *parent)
 
     ui->clear_button->installEventFilter(this);
 
-    //this->installEventFilter(this);
-ui->statusbar->showMessage(ui->plus_button->metaObject()->className());
+      ui->result->installEventFilter(this);
+
 }
 
-//#define scale_koef (this->size().height()/(this->size().height()/object))
+
 
 CalcWindow::~CalcWindow()
 {
@@ -107,26 +107,25 @@ CalcWindow::~CalcWindow()
 bool CalcWindow::eventFilter(QObject *object, QEvent *event)
 {
     QPushButton *button = static_cast<QPushButton*>(object);
-    if(/*object->metaObject()->className()=="QPushButton"*/
-            //static_cast<QPushButton*>(object)
-            button
-            && event->type()== QEvent::Resize
-            //&& this->size()!=this->minimumSize()
-            ) {
+
+    if (button && event->type() == QEvent::Resize) {
+
         QFont font = button->font();
-    static double const scale_koef = this->minimumSize().height()/font.pointSize();
 
-        ui->statusbar->showMessage(QString::number(ui->plus_button->size().height())+" FONT == "+/*QString::number(font.pixelSize())+*/' '+QString::number(font.pointSize()));
+static double const scale_koef = this->minimumSize().height()/font.pointSize();
 
-        //font.setPointSize(this->size().height()/37.5);
-        //font.setPointSize(this->size().height()/(this->minimumSize().height()/font.pointSize()));
+        if(strcmp(button->metaObject()->className(),"QPushButton")==0)
         font.setPointSize(this->size().height()/scale_koef);
+
+        else if(strcmp(button->metaObject()->className(),"QLabel")==0)
+        font.setPointSize(this->size().height()/scale_koef*2.5);
+
+
         button->setFont(font);
+
     }
 
-//    CalcWindow *main = static_cast<CalcWindow*>(this);
-//    if(main && event->type()==QEvent::Resize)
-//        qDebug() << "MAIN WINDOW SIZE == " << QString::number(this->size().height());
+
 
         return QMainWindow::eventFilter(object, event);
 }
@@ -227,22 +226,20 @@ void CalcWindow::simple_ops()
     // precent from number/operation
         else if(button->text() == "%")
     {
-//        on_equal_button_clicked();
-//        all_numbers = (ui->result->text()).toDouble();
-//        all_numbers*=0.01;
-//        new_label = QString::number(all_numbers, 'g', 15);
-
-//        ui->result->setText(new_label);
-//        buffer_=all_numbers;
 
         all_numbers = (ui->result->text()).toDouble();
+
         if(math_switch("plus")||math_switch("minus")||math_switch("mod"))
             all_numbers*=0.01*buffer_;
+
 //        else if(math_switch("multi")||math_switch("div"))
 //            all_numbers*=0.01;
+
         else //if(!math_switch())
             all_numbers*=0.01;
+
         new_label = QString::number(all_numbers, 'g', 15);
+
         ui->result->setText(new_label);
 
 
