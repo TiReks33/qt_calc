@@ -103,6 +103,9 @@ CalcWindow::CalcWindow(QWidget *parent)
 
       ui->right_br_button->setEnabled(false);
       ui->right_br_button->setStyleSheet("color: gray");
+
+      ui->right_br_button->installEventFilter(this);
+      ui->left_br_button->installEventFilter(this);
 }
 
 
@@ -124,7 +127,7 @@ bool CalcWindow::eventFilter(QObject *object, QEvent *event)
 static double const scale_koef = this->minimumSize().height()/font.pointSize();
 
         if(strcmp(button->metaObject()->className(),"QPushButton")==0)
-        font.setPointSize(this->size().height()/scale_koef);
+        font.setPointSize(this->size().height()/scale_koef*0.75);
 
         else if(strcmp(button->metaObject()->className(),"QLabel")==0)
         font.setPointSize(this->size().height()/scale_koef*2.5);
