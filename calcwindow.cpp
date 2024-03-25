@@ -624,6 +624,18 @@ void CalcWindow::on_clear_button_clicked()
     buffer_checked()=true;
     buffer_=0.0;
     //clear_checked()=false;
+
+    //brackets clear-->>
+    ui->equal_button->setEnabled(true);
+    ui->equal_button->setStyleSheet("");
+    ui->left_br_button->setEnabled(true);
+    ui->left_br_button->setStyleSheet("");
+
+    ui->right_br_button->setEnabled(false);
+    ui->right_br_button->setStyleSheet("color: gray");
+
+    brackets_check()=false;
+    //<<--
 }
 
 void CalcWindow::brackets()
@@ -665,6 +677,12 @@ void CalcWindow::brackets()
     } else
     if(button==ui->right_br_button){
 
+        // checking if brackets include only digit (without expression symbol)
+        if(!math_switch("plus")&&!math_switch("minus")&&!math_switch("div")
+                               &&!math_switch("multi")&&!math_switch("mod"))
+        {buffer_=ui->result->text().toDouble();}
+
+        // calculate expression in brackets
         on_equal_button_clicked();
 
         //%%%%%%%%%%%%%
@@ -672,9 +690,13 @@ void CalcWindow::brackets()
         //%%%%%%%%%%%%%
         if(plus){buffer_=buffer_2+buffer_;plus=false;}
         else if(minus){buffer_=buffer_2-buffer_;minus=false;}
-        else if(div){buffer_=buffer_2/buffer_;div=false;}
+        else if(div){if(!buffer_){buffer_=0;
+                                  ui->statusbar->showMessage("Warning: division by zero!!");
+                    }else buffer_=buffer_2/buffer_;div=false;}
         else if(multi){buffer_=buffer_2*buffer_;multi=false;}
-        else if(mod){buffer_=std::fmod(buffer_2,buffer_);mod=false;}
+        else if(mod){if(!buffer_){buffer_=0;
+                                  ui->statusbar->showMessage("Warning: division by zero!!");
+                    }else buffer_=std::fmod(buffer_2,buffer_);mod=false;}
 
             ui->statusbar->showMessage(QString::number(buffer_));
             ui->result->setText(QString::number(buffer_));

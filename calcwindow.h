@@ -65,7 +65,7 @@ private slots:
 
     void brackets();
 
-    void on_left_br_button_clicked();
+    //void on_left_br_button_clicked();
 
     bool & brackets_check(){static bool brackets=false;return brackets;}
 
